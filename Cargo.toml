@@ -9,7 +9,7 @@ edition = "2018"
 [dependencies]
 
 anyhow = "1.0"
-async-trait = "0.1.42"
+async-trait = "0.1"
 chrono = "0.4"
 tokio = { version = "0.3", features = ['full'] }
 
