@@ -11,7 +11,7 @@ impl From<Rc<SystemPageViewMode>> for SystemPage {
 }
 
 impl Widget for &SystemPage {
-    fn render(self, area: Rect, buf: &mut Buffer) {
+    fn render(self, _area: Rect, _buf: &mut Buffer) {
         if !*self.vm.focused.borrow() {
             return;
         }

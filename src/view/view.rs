@@ -10,6 +10,7 @@ pub struct View {
     tab: TabComponent,
 
     event_page: EventPage,
+    system_page: SystemPage,
 }
 
 impl From<Rc<ViewModel>> for View {
@@ -20,6 +21,7 @@ impl From<Rc<ViewModel>> for View {
             tab: TabComponent::from(view_model.tab.clone()),
 
             event_page: EventPage::from(view_model.event_page.clone()),
+            system_page: SystemPage::from(view_model.system_page.clone()),
         }
     }
 }
@@ -38,7 +40,11 @@ impl Widget for &View {
             ])
             .split(area);
 
+        // render tab
         self.tab.render(chunks[0], buf);
+
+        // render pages
         self.event_page.render(chunks[1], buf);
+        self.system_page.render(chunks[1], buf);
     }
 }

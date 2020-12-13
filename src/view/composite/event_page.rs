@@ -4,14 +4,16 @@ pub struct EventPage {
     vm: Rc<EventPageViewMode>,
 
     title_list: ListComponent,
+    event_detail: MessageComponent,
 }
 
 impl From<Rc<EventPageViewMode>> for EventPage {
     fn from(view_model: Rc<EventPageViewMode>) -> Self {
-        let title_list = ListComponent::from(view_model.title_list.clone());
         Self {
-            vm: view_model,
-            title_list,
+            vm: view_model.clone(),
+
+            title_list: ListComponent::from(view_model.title_list.clone()),
+            event_detail: MessageComponent::from(view_model.event_detail.clone()),
         }
     }
 }
@@ -26,30 +28,46 @@ impl Widget for &EventPage {
             .direction(Direction::Horizontal)
             .constraints(vec![Constraint::Ratio(1, 2), Constraint::Ratio(1, 2)])
             .split(area);
-        let list_component_area = chunks[0];
-        self.title_list.render(list_component_area, buf);
+
+        let list_area = chunks[0];
+        self.title_list.render(list_area, buf);
+
+        let content_area = chunks[1];
+        self.event_detail.render(content_area, buf);
     }
 }
 
 pub struct EventPageViewMode {
-    pub focused: RefCell<bool>,
+    pub title_list: Rc<ListComponentViewModel>,
+    pub event_detail: Rc<MessageComponentViewModel>,
+
+    focused: RefCell<bool>,
 
     pub page_title: Rc<RefCell<String>>,
-    pub title_list: Rc<ListComponentViewModel>,
+    pub event_items: RefCell<Vec<Rc<EventItem>>>,
 }
 
 impl Default for EventPageViewMode {
     fn default() -> Self {
         let page_title = Rc::new(RefCell::new("Event".to_owned()));
-        let title_list_title = "activated events";
+
         let title_list = ListComponentViewModel::default();
-        title_list.title.replace(title_list_title.to_owned());
+        title_list.title.replace("activated events".to_owned());
+        title_list.focused.replace(true);
+
+        let event_content = MessageComponentViewModel::default();
+        event_content
+            .title
+            .replace(Some("event content".to_owned()));
 
         Self {
+            title_list: Rc::new(title_list),
+            event_detail: Rc::new(event_content),
+
             focused: RefCell::new(true),
 
             page_title,
-            title_list: Rc::new(title_list),
+            event_items: RefCell::new(vec![]),
         }
     }
 }
@@ -57,28 +75,50 @@ impl Default for EventPageViewMode {
 impl Evolute for EventPageViewMode {
     fn evolute(&self, evolution: &Evolution) {
         let data = evolution.new_data;
-        let mut titles: Vec<String> = vec![];
 
-        data.events
-            .iter()
-            .for_each(|event| titles.push(event.subject.clone()));
+        data.events.iter().for_each(|event| {
+            self.event_items.borrow_mut().push(Rc::new(EventItem {
+                subject: RefCell::new(event.subject.clone()),
+                content: RefCell::new(event.content.clone()),
 
-        self.title_list.items.replace(titles);
+                is_selected: RefCell::new(false),
+            }))
+        });
+
+        self.title_list.items.replace(
+            self.event_items
+                .borrow()
+                .iter()
+                .map(|item| item.clone() as Rc<(dyn ListComponentItem)>)
+                .collect::<Vec<Rc<dyn ListComponentItem>>>(),
+        );
     }
 }
 
 impl KeyEventHandler for EventPageViewMode {
     fn handle_key(&self, key: &crossterm::event::KeyEvent) {
+        if !*self.focused.borrow() {
+            return;
+        }
         match key.code {
             crossterm::event::KeyCode::Enter => {}
-            crossterm::event::KeyCode::Left => {}
-            crossterm::event::KeyCode::Right => {}
-            crossterm::event::KeyCode::Up => {}
-            crossterm::event::KeyCode::Down => {}
-            crossterm::event::KeyCode::PageUp => {}
-            crossterm::event::KeyCode::PageDown => {}
             crossterm::event::KeyCode::Esc => {}
             _ => {}
+        }
+        self.title_list.handle_key(key);
+
+        let event_items = self.event_items.borrow();
+        let selected_event = event_items.iter().find(|event| *event.is_selected.borrow());
+        if let Some(event) = selected_event {
+            self.event_detail
+                .subject
+                .replace(Some(event.subject.borrow().clone()));
+            self.event_detail
+                .content
+                .replace(Some(event.content.borrow().clone()));
+        } else {
+            self.event_detail.subject.replace(None);
+            self.event_detail.content.replace(None);
         }
     }
 }
@@ -90,5 +130,30 @@ impl Page for EventPageViewMode {
 
     fn set_focused(&self, focused: bool) {
         self.focused.replace(focused);
+    }
+}
+
+pub struct EventItem {
+    subject: RefCell<String>,
+    content: RefCell<String>,
+
+    is_selected: RefCell<bool>,
+}
+
+impl ListComponentItem for EventItem {
+    fn get_name(&self) -> String {
+        self.subject.borrow().clone()
+    }
+
+    fn is_selected(&self) -> bool {
+        *self.is_selected.borrow()
+    }
+
+    fn select(&self) {
+        self.is_selected.replace(true);
+    }
+
+    fn unselect(&self) {
+        self.is_selected.replace(false);
     }
 }
