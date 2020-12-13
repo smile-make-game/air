@@ -57,18 +57,7 @@ impl Evolute for ViewModel {
 
 impl KeyEventHandler for ViewModel {
     fn handle_key(&self, key: &KeyEvent) {
-        match key.code {
-            KeyCode::Tab => {
-                if key.modifiers == KeyModifiers::NONE {
-                    self.tab.select_next();
-                }
-            }
-            KeyCode::BackTab => {
-                if key.modifiers == KeyModifiers::SHIFT {
-                    self.tab.select_prev();
-                }
-            }
-            _ => {}
-        }
+        self.tab.handle_key(key);
+        self.event_page.handle_key(key);
     }
 }

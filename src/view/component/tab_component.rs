@@ -1,4 +1,5 @@
 use super::dep::*;
+use crate::view::interfaces::page::Page;
 
 pub struct TabComponent {
     vm: Rc<TabComponentViewModel>,
@@ -13,10 +14,13 @@ impl From<Rc<TabComponentViewModel>> for TabComponent {
 impl Widget for &TabComponent {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let pages = self.vm.pages.borrow();
-        let tab_titles: Vec<Spans> = pages.iter().map(|p| {
-            let title = format!(" {} ", p.get_title());
-            Spans::from(title)
-        }).collect();
+        let tab_titles: Vec<Spans> = pages
+            .iter()
+            .map(|p| {
+                let title = format!(" {} ", p.get_title());
+                Spans::from(title)
+            })
+            .collect();
         Tabs::new(tab_titles)
             .select(self.vm.selected.borrow().clone())
             .highlight_style(selection_normal_style())
@@ -35,7 +39,7 @@ impl TabComponentViewModel {
         self.pages.borrow_mut().push(page);
     }
 
-    pub fn select_next(&self) {
+    fn select_next(&self) {
         let pages = self.pages.borrow();
         let len = pages.len();
         if len > 0 {
@@ -48,7 +52,7 @@ impl TabComponentViewModel {
         }
     }
 
-    pub fn select_prev(&self) {
+    fn select_prev(&self) {
         let pages = self.pages.borrow();
         let len = pages.len();
         if len > 0 {
@@ -68,6 +72,24 @@ impl Default for TabComponentViewModel {
             selected: RefCell::new(0),
 
             pages: RefCell::new(vec![]),
+        }
+    }
+}
+
+impl KeyEventHandler for TabComponentViewModel {
+    fn handle_key(&self, key: &KeyEvent) {
+        match key.code {
+            KeyCode::Tab => {
+                if key.modifiers == KeyModifiers::NONE {
+                    self.select_next();
+                }
+            }
+            KeyCode::BackTab => {
+                if key.modifiers == KeyModifiers::SHIFT {
+                    self.select_prev();
+                }
+            }
+            _ => {}
         }
     }
 }
