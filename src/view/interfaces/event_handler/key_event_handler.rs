@@ -1,4 +1,4 @@
-use crossterm::event::KeyEvent;
+pub use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
 pub trait KeyEventHandler {
     fn handle_key(&self, key: &KeyEvent);
