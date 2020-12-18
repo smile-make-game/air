@@ -57,8 +57,8 @@ impl TabComponentViewModel {
         let len = pages.len();
         if len > 0 {
             let cur = *self.selected.borrow();
-            let prev = (cur + 1) % len;
-            log::debug!("select next tab: index={}", prev);
+            let prev = (cur + len - 1) % len;
+            log::debug!("select prev tab: index={}", prev);
             pages[cur].set_focused(false);
             pages[prev].set_focused(true);
             self.selected.replace(prev);
