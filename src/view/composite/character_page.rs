@@ -11,7 +11,7 @@ impl From<Rc<CharacterPageViewMode>> for CharacterPage {
         Self {
             vm: view_model.clone(),
 
-            title_list: ListComponent::from(view_model.title_list.clone()),
+            title_list: ListComponent::from(view_model.character_list.clone()),
         }
     }
 }
@@ -33,11 +33,12 @@ impl Widget for &CharacterPage {
 }
 
 pub struct CharacterPageViewMode {
-    pub title_list: Rc<ListComponentViewModel>,
+    pub character_list: Rc<ListComponentViewModel>,
 
     focused: RefCell<bool>,
 
     pub page_title: Rc<RefCell<String>>,
+    pub brief_list: RefCell<Vec<Rc<CharacterBrief>>>,
 }
 
 impl Default for CharacterPageViewMode {
@@ -54,17 +55,34 @@ impl Default for CharacterPageViewMode {
             .replace(Some("event content".to_owned()));
 
         Self {
-            title_list: Rc::new(title_list),
+            character_list: Rc::new(title_list),
 
             focused: RefCell::new(true),
 
             page_title,
+            brief_list: RefCell::new(vec![]),
         }
     }
 }
 
 impl Evolute for CharacterPageViewMode {
     fn evolute(&self, evolution: &Evolution) {
+        let data = evolution.new_data;
+        data.characters.iter().for_each(|character| {
+            self.brief_list.borrow_mut().push(Rc::new(CharacterBrief {
+                name: RefCell::new(character.name.clone()),
+
+                is_selected: RefCell::new(false),
+            }));
+        });
+
+        self.character_list.items.replace(
+            self.brief_list
+                .borrow()
+                .iter()
+                .map(|item| item.clone() as Rc<(dyn ListComponentItem)>)
+                .collect::<Vec<Rc<dyn ListComponentItem>>>(),
+        );
     }
 }
 
@@ -78,7 +96,7 @@ impl KeyEventHandler for CharacterPageViewMode {
             crossterm::event::KeyCode::Esc => {}
             _ => {}
         }
-        self.title_list.handle_key(key);
+        self.character_list.handle_key(key);
     }
 }
 
@@ -89,5 +107,29 @@ impl Page for CharacterPageViewMode {
 
     fn set_focused(&self, focused: bool) {
         self.focused.replace(focused);
+    }
+}
+
+pub struct CharacterBrief {
+    name: RefCell<String>,
+
+    is_selected: RefCell<bool>,
+}
+
+impl ListComponentItem for CharacterBrief {
+    fn get_name(&self) -> String {
+        self.name.borrow().clone()
+    }
+
+    fn is_selected(&self) -> bool {
+        *self.is_selected.borrow()
+    }
+
+    fn select(&self) {
+        self.is_selected.replace(true);
+    }
+
+    fn unselect(&self) {
+        self.is_selected.replace(false);
     }
 }

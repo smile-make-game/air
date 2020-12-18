@@ -56,6 +56,7 @@ impl Default for ViewModel {
 impl Evolute for ViewModel {
     fn evolute(&self, evolution: &crate::model::Evolution) {
         self.event_page.evolute(evolution);
+        self.character_page.evolute(evolution);
     }
 }
 
@@ -63,5 +64,6 @@ impl KeyEventHandler for ViewModel {
     fn handle_key(&self, key: &KeyEvent) {
         self.tab.handle_key(key);
         self.event_page.handle_key(key);
+        self.character_page.handle_key(key);
     }
 }
