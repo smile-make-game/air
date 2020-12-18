@@ -57,7 +57,7 @@ impl Default for CharacterPageViewMode {
         Self {
             character_list: Rc::new(title_list),
 
-            focused: RefCell::new(true),
+            focused: RefCell::new(false),
 
             page_title,
             brief_list: RefCell::new(vec![]),
