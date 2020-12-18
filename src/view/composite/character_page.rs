@@ -46,7 +46,7 @@ impl Default for CharacterPageViewMode {
         let page_title = Rc::new(RefCell::new("Characters".to_owned()));
 
         let title_list = ListComponentViewModel::default();
-        title_list.title.replace("activated events".to_owned());
+        title_list.title.replace("activated characters".to_owned());
         title_list.focused.replace(true);
 
         let event_content = MessageComponentViewModel::default();
