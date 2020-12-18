@@ -49,7 +49,7 @@ pub struct EventPageViewMode {
 
 impl Default for EventPageViewMode {
     fn default() -> Self {
-        let page_title = Rc::new(RefCell::new("Event".to_owned()));
+        let page_title = Rc::new(RefCell::new("Events".to_owned()));
 
         let title_list = ListComponentViewModel::default();
         title_list.title.replace("activated events".to_owned());

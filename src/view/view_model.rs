@@ -12,6 +12,7 @@ pub struct ViewModel {
     pub tab: Rc<TabComponentViewModel>,
     // pages
     pub event_page: Rc<EventPageViewMode>,
+    pub character_page: Rc<CharacterPageViewMode>,
     pub system_page: Rc<SystemPageViewMode>,
 
     // internal fields
@@ -33,16 +34,19 @@ impl Default for ViewModel {
         let edge_border = Rc::new(EdgeComponentViewModel::default());
 
         let event_page = Rc::new(EventPageViewMode::default());
+        let character_page = Rc::new(CharacterPageViewMode::default());
         let system_page = Rc::new(SystemPageViewMode::default());
 
         let tab = Rc::new(TabComponentViewModel::default());
         tab.register_tab(event_page.clone());
+        tab.register_tab(character_page.clone());
         tab.register_tab(system_page.clone());
 
         Self {
             tab,
             edge_border,
             event_page,
+            character_page,
             system_page,
 
             _is_loading: RefCell::new(false),
