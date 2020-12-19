@@ -4,6 +4,7 @@ pub struct CharacterPage {
     vm: Rc<CharacterPageViewMode>,
 
     title_list: ListComponent,
+    character_detail: CharacterDetailComponent,
 }
 
 impl From<Rc<CharacterPageViewMode>> for CharacterPage {
@@ -12,6 +13,7 @@ impl From<Rc<CharacterPageViewMode>> for CharacterPage {
             vm: view_model.clone(),
 
             title_list: ListComponent::from(view_model.character_list.clone()),
+            character_detail: CharacterDetailComponent::from(view_model.character_detail.clone()),
         }
     }
 }
@@ -29,11 +31,15 @@ impl Widget for &CharacterPage {
 
         let list_area = chunks[0];
         self.title_list.render(list_area, buf);
+
+        let detail_area = chunks[1];
+        self.character_detail.render(detail_area, buf);
     }
 }
 
 pub struct CharacterPageViewMode {
     pub character_list: Rc<ListComponentViewModel>,
+    pub character_detail: Rc<CharacterDetailComponentViewModel>,
 
     focused: RefCell<bool>,
 
@@ -56,6 +62,7 @@ impl Default for CharacterPageViewMode {
 
         Self {
             character_list: Rc::new(title_list),
+            character_detail: Rc::new(CharacterDetailComponentViewModel::default()),
 
             focused: RefCell::new(false),
 
