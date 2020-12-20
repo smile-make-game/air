@@ -1,4 +1,4 @@
-use super::evolution::*;
+use super::{definitions::*, evolution::*};
 use anyhow::Result;
 
 pub struct DataModel {
@@ -44,9 +44,8 @@ impl DataModel {
             },
         ];
         self.characters = vec![
-            CharacterModel {
-                name: "Vactar".to_owned()
-            }
+            CharacterModelBuilder::new("Vactar").build(),
+            CharacterModelBuilder::new("Hero").build(),
         ];
         Ok(())
     }
@@ -55,15 +54,4 @@ impl DataModel {
         // TODO: implement
         Evolution { new_data: self }
     }
-}
-
-#[derive(Debug)]
-pub struct EventModel {
-    pub subject: String,
-    pub content: String,
-}
-
-#[derive(Debug)]
-pub struct CharacterModel {
-    pub name: String
 }

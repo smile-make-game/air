@@ -18,3 +18,5 @@ tui = { version = "0.13", default-features = false, features = ['crossterm'] }
 
 flexi_logger = "0.16"
 log = "0.4"
+
+uuid = { version = "0.8", features = ["serde", "v4"] }
