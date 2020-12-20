@@ -4,18 +4,18 @@ pub use crossterm::event::Event;
 use event::KeyModifiers;
 
 pub enum Input {
-    Tick,
+    Idle,
     Event(Event),
 }
 
-pub fn tick_or_event() -> Result<Input> {
+pub fn idle_or_event() -> Result<Input> {
     let result: Input;
     if event::poll(std::time::Duration::from_millis(200))? {
         let event = event::read()?;
         log::debug!("get event from poll: {:?}", event);
         result = Input::Event(event)
     } else {
-        result = Input::Tick;
+        result = Input::Idle;
     }
 
     Ok(result)
