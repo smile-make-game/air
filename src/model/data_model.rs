@@ -1,4 +1,4 @@
-use super::{models::*, evolution::*};
+use super::{DataRepository, evolution::*, models::*};
 use anyhow::Result;
 
 pub struct DataModel {
@@ -52,6 +52,9 @@ impl DataModel {
 
     pub fn get_evolution(&self) -> Evolution {
         // TODO: implement
-        Evolution { new_data: self }
+        Evolution {
+            new_data: self,
+            method: Method::Refresh,
+        }
     }
 }

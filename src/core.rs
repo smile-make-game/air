@@ -1,10 +1,12 @@
 use crate::{model::*, utilities::input_piper::*, view::*};
 use anyhow::Result;
-use std::cell::RefCell;
+use tokio::select;
+use std::{cell::RefCell, rc::Rc};
 
 pub struct Core {
     view: ViewWrapper,
     model: RefCell<DataModel>,
+    repository: Rc<dyn DataRepository>,
 }
 
 impl Default for Core {
@@ -12,6 +14,7 @@ impl Default for Core {
         Core {
             view: ViewWrapper::default(),
             model: RefCell::new(DataModel::default()),
+            repository: init_data_repository(),
         }
     }
 }
@@ -19,7 +22,8 @@ impl Default for Core {
 impl Core {
     pub async fn init(&self) -> Result<()> {
         self.model.borrow_mut().load().await?;
-        self.view.apply_evolution(self.model.borrow().get_evolution())?;
+        self.view
+            .apply_evolution(self.model.borrow().get_evolution())?;
         Ok(())
     }
 
@@ -39,7 +43,7 @@ impl Core {
             let effect: Option<Evolution>;
 
             // read input
-            let input = tick_or_event()?;
+            let input = idle_or_event()?;
 
             // process input
             if let Input::Event(event) = input {
