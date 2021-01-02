@@ -1,18 +1,24 @@
+/// Model definition
+#[derive(Debug, Default, Clone)]
 pub struct Model {
-    character_list: CharacterListModel,
-    quest_list: QuestListModel
+    pub character_list: CharacterListModel,
+    pub quest_list: QuestListModel,
 }
 
 pub type CharacterListModel = Vec<CharacterModel>;
+/// CharacterModel definition
+#[derive(Debug, Clone)]
 pub struct CharacterModel {
-    id: String,
+    pub id: String,
 
-    name: String,
+    pub name: String,
 }
 
 pub type QuestListModel = Vec<QuestModel>;
+/// QuestModel definition
+#[derive(Debug, Clone)]
 pub struct QuestModel {
-    id: String,
+    pub id: String,
 
-    title: String,
+    pub title: String,
 }

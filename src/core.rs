@@ -42,7 +42,13 @@ impl Core {
         self.repository_channel = Some(repo_addr);
 
         let handle = tokio::spawn(async move {
-            repository.run().await;
+            let task = repository.run().await;
+            match task {
+                Ok(_) => {}
+                Err(err) => {
+                    log::error!("error on repository: {:?}", err);
+                }
+            }
         });
         self.repository = Some(handle);
 

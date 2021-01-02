@@ -1,22 +1,19 @@
-use std::{collections::HashMap, fmt::Debug};
+use super::models::Model;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum RepositoryMessage {
     ToRepository(ToRepositoryMessage),
     FromRepository(FromRepositoryMessage),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ToRepositoryMessage {}
 
 pub type FromRepositoryMessage = Vec<FromRepositoryMessageItem>;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum FromRepositoryMessageItem {
-    Insert,
-    Update,
-    Remove,
-}
-
-pub struct PartialModel {
+    Insert(Model),
+    Update(Model),
+    Remove(Model),
 }

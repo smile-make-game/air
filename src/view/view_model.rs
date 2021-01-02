@@ -1,3 +1,5 @@
+use crate::model::{FromRepositoryMessageItem, RepositoryMessage};
+
 use super::{
     component::view_model::*, composite::view_model::*, interfaces::event_handler::KeyEventHandler,
 };
@@ -57,5 +59,9 @@ impl ViewModel {
             Event::Mouse(_) => {}
             Event::Resize(_column_count, _row_count) => {}
         }
+    }
+
+    pub fn process_data(&self, data: RepositoryMessage) {
+        if let RepositoryMessage::FromRepository(msg) = data {}
     }
 }

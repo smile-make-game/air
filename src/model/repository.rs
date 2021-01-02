@@ -1,15 +1,18 @@
-use super::RepositoryMessage;
+use std::time::Duration;
+
+use super::{models::*, repository_message::*};
 use anyhow::Result;
 use tokio::{
     select,
     sync::mpsc::{channel, Receiver, Sender},
+    time::sleep,
 };
 
 #[async_trait::async_trait]
 pub trait Repository: Send + Sync {
     fn register_view_channel(&mut self, channel: Sender<RepositoryMessage>);
     fn get_channel(&self) -> Sender<RepositoryMessage>;
-    async fn run(&mut self);
+    async fn run(&mut self) -> Result<()>;
 }
 
 pub fn bootstrap_repository() -> Result<Box<dyn Repository>> {
@@ -19,6 +22,8 @@ pub fn bootstrap_repository() -> Result<Box<dyn Repository>> {
         view_channel: None,
         receiver: rx,
         channel: tx,
+
+        data_local_cache: Model::default(),
     };
 
     Ok(Box::new(repository))
@@ -28,6 +33,8 @@ struct DataRepository {
     view_channel: Option<Sender<RepositoryMessage>>,
     receiver: Receiver<RepositoryMessage>,
     channel: Sender<RepositoryMessage>,
+
+    data_local_cache: Model,
 }
 
 impl Drop for DataRepository {
@@ -36,9 +43,24 @@ impl Drop for DataRepository {
 
 #[async_trait::async_trait]
 impl Repository for DataRepository {
-    async fn run(&mut self) {
+    async fn run(&mut self) -> Result<()> {
+        let mut change_set: Vec<FromRepositoryMessageItem>;
+        self.load().await?;
+        change_set = vec![FromRepositoryMessageItem::Insert(
+            self.data_local_cache.clone(),
+        )];
         loop {
-            self.select().await;
+            if change_set.len() > 0 {
+                let channel = self.view_channel.clone().unwrap();
+                channel
+                    .send(RepositoryMessage::FromRepository(change_set.clone()))
+                    .await?;
+                change_set.clear();
+            }
+            let message = self.select().await;
+            if let Some(msg) = message {
+                // TODO: collect change set
+            }
         }
     }
 
@@ -52,9 +74,24 @@ impl Repository for DataRepository {
 }
 
 impl DataRepository {
-    async fn select(&mut self) {
+    async fn select(&mut self) -> Option<RepositoryMessage> {
         select! {
             message = self.receiver.recv() => { message }
+            _ = tokio::time::sleep(Duration::from_millis(100)) => { None }
+        }
+    }
+
+    async fn load(&mut self) -> Result<()> {
+        self.data_local_cache = Model {
+            character_list: vec![CharacterModel {
+                id: "cid1".to_owned(),
+                name: "name1".to_owned(),
+            }],
+            quest_list: vec![QuestModel {
+                id: "qid1".to_owned(),
+                title: "quest title".to_owned(),
+            }],
         };
+        Ok(())
     }
 }
