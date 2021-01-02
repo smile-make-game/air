@@ -1,29 +1,51 @@
-use crate::{model::*, utilities::input_piper::*, view::*};
+use std::{cell::RefCell, time::Duration};
+
+use crate::{model::*, view::*};
 use anyhow::Result;
-use tokio::select;
-use std::{cell::RefCell, rc::Rc};
+use crossterm::event;
+use tokio::{
+    select, spawn,
+    sync::mpsc::{channel, Receiver, Sender},
+    task::JoinHandle,
+    time::sleep,
+};
 
 pub struct Core {
     view: ViewWrapper,
-    model: RefCell<DataModel>,
-    repository: Rc<dyn DataRepository>,
+    repository: Option<JoinHandle<()>>,
+
+    channel: Sender<RepositoryMessage>,
+    receiver: RefCell<Receiver<RepositoryMessage>>,
+    repository_channel: Option<Sender<RepositoryMessage>>,
 }
 
 impl Default for Core {
     fn default() -> Self {
+        let (tx, rx) = channel::<RepositoryMessage>(1);
+
         Core {
             view: ViewWrapper::default(),
-            model: RefCell::new(DataModel::default()),
-            repository: init_data_repository(),
+            repository: None,
+
+            channel: tx,
+            receiver: RefCell::new(rx),
+            repository_channel: None,
         }
     }
 }
 
 impl Core {
-    pub async fn init(&self) -> Result<()> {
-        self.model.borrow_mut().load().await?;
-        self.view
-            .apply_evolution(self.model.borrow().get_evolution())?;
+    pub async fn init(&mut self) -> Result<()> {
+        let mut repository = bootstrap_repository()?;
+        let repo_addr = repository.get_channel();
+        repository.register_view_channel(self.channel.clone());
+        self.repository_channel = Some(repo_addr);
+
+        let handle = tokio::spawn(async move {
+            repository.run().await;
+        });
+        self.repository = Some(handle);
+
         Ok(())
     }
 
@@ -40,32 +62,70 @@ impl Core {
 
     async fn priv_dead_loop(&self) -> Result<()> {
         loop {
-            let effect: Option<Evolution>;
-
-            // read input
-            let input = idle_or_event()?;
-
-            // process input
-            if let Input::Event(event) = input {
-                if should_exit(&event) {
-                    // TODO: save data
-
-                    break;
+            let input = self.select().await?;
+            log::trace!("get input: {:?}", input);
+            match input {
+                Input::Idle => {
+                    self.view.tick()?;
                 }
-                effect = self.view.quick_update(&event)?;
-            } else {
-                effect = None;
-            }
+                Input::Event(event) => {
+                    if should_exit(&event) {
+                        // TODO: save data
 
-            // apply data patch
-            let mut data = self.model.borrow_mut();
-            let view_patch = data.evolute(effect).await?;
-
-            // apply view patch
-            if let Some(view_patch) = view_patch {
-                self.view.apply_evolution(view_patch)?;
-            }
+                        break;
+                    }
+                    self.view.handle_input(&event)?;
+                }
+                Input::Tick => {
+                    self.view.tick()?;
+                }
+                Input::Message(message) => {
+                    if let Some(msg) = message {
+                        self.view.handle_message(msg)?;
+                    }
+                }
+            };
         }
         Ok(())
     }
+
+    async fn select(&self) -> Result<Input> {
+        let mut receiver = self.receiver.borrow_mut();
+        select! {
+            input = spawn(async { idle_or_event() }) => input?,
+            // _ = sleep(Duration::from_millis(50)) => Ok(Input::Tick),
+            message = receiver.recv() => Ok(Input::Message(message)),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub enum Input {
+    Idle,
+    Tick,
+    Event(event::Event),
+    Message(Option<RepositoryMessage>),
+}
+
+pub fn idle_or_event() -> Result<Input> {
+    let result: Input;
+    if event::poll(std::time::Duration::from_millis(200))? {
+        let event = event::read()?;
+        log::debug!("get event from poll: {:?}", event);
+        result = Input::Event(event)
+    } else {
+        result = Input::Idle;
+    }
+
+    Ok(result)
+}
+
+pub fn should_exit(event: &event::Event) -> bool {
+    if let event::Event::Key(key) = event {
+        if key.code == event::KeyCode::Char('c') && key.modifiers == event::KeyModifiers::CONTROL {
+            log::info!("should exit");
+            return true;
+        }
+    }
+    return false;
 }

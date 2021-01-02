@@ -75,11 +75,15 @@ impl Default for ListComponentViewModel {
 
 impl ListComponentViewModel {
     fn select_next(&self, n: usize) {
+        let len = self.items.borrow().len();
+        if len == 0 {
+            return;
+        }
+
         let selected = self.selected_index();
         if let Some(selected) = selected {
             self.items.borrow()[selected].unselect();
 
-            let len = self.items.borrow().len();
             let selected = selected + n;
             let selected = if selected >= len { len - 1 } else { selected };
             self.items.borrow()[selected].select();
@@ -89,8 +93,12 @@ impl ListComponentViewModel {
     }
 
     fn select_prev(&self, n: usize) {
-        let selected = self.selected_index();
+        let len = self.items.borrow().len();
+        if len == 0 {
+            return;
+        }
 
+        let selected = self.selected_index();
         if let Some(selected) = selected {
             self.items.borrow()[selected].unselect();
 

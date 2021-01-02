@@ -1,7 +1,5 @@
 use super::{
-    component::view_model::*,
-    composite::view_model::*,
-    interfaces::{event_handler::KeyEventHandler, evolute::Evolute},
+    component::view_model::*, composite::view_model::*, interfaces::event_handler::KeyEventHandler,
 };
 use crossterm::event::*;
 use std::{cell::RefCell, rc::Rc};
@@ -17,16 +15,6 @@ pub struct ViewModel {
 
     // internal fields
     _is_loading: RefCell<bool>,
-}
-
-impl ViewModel {
-    pub fn process_input(&self, event: &Event) {
-        match event {
-            Event::Key(key) => self.handle_key(key),
-            Event::Mouse(_) => {}
-            Event::Resize(_column_count, _row_count) => {}
-        }
-    }
 }
 
 impl Default for ViewModel {
@@ -53,17 +41,21 @@ impl Default for ViewModel {
         }
     }
 }
-impl Evolute for ViewModel {
-    fn evolute(&self, evolution: &crate::model::Evolution) {
-        self.event_page.evolute(evolution);
-        self.character_page.evolute(evolution);
-    }
-}
 
 impl KeyEventHandler for ViewModel {
     fn handle_key(&self, key: &KeyEvent) {
         self.tab.handle_key(key);
         self.event_page.handle_key(key);
         self.character_page.handle_key(key);
+    }
+}
+
+impl ViewModel {
+    pub fn process_input(&self, event: &Event) {
+        match event {
+            Event::Key(key) => self.handle_key(key),
+            Event::Mouse(_) => {}
+            Event::Resize(_column_count, _row_count) => {}
+        }
     }
 }

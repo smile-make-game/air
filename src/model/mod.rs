@@ -1,12 +1,8 @@
-mod backend;
-mod data_model;
-mod data_repository;
-mod evolution;
 mod models;
+mod repository;
+mod repository_message;
 
-pub use data_model::*;
-pub use data_repository::*;
-pub use evolution::*;
-pub use models::*;
+pub use repository::*;
+pub use repository_message::*;
 
-pub use data_repository::init_data_repository;
+pub use repository::bootstrap_repository;

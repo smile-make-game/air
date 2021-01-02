@@ -1,4 +1,4 @@
-use super::{helper::*, interfaces::evolute::Evolute, view::View, view_model::ViewModel};
+use super::{helper::*, view::View, view_model::ViewModel};
 use crate::model::*;
 use anyhow::Result;
 use crossterm::event::Event;
@@ -9,7 +9,6 @@ pub struct ViewWrapper {
     terminal: RefCell<Terminal<CrosstermBackend<Stdout>>>,
 
     view_model: Rc<ViewModel>,
-
     view: View,
 }
 
@@ -34,15 +33,17 @@ impl Drop for ViewWrapper {
 }
 
 impl ViewWrapper {
-    pub fn quick_update(&self, event: &Event) -> Result<Option<Evolution>> {
+    pub fn handle_input(&self, event: &Event) -> Result<()> {
         self.view_model.process_input(event);
-        self.draw()?;
-        Ok(None)
+        Ok(self.tick()?)
     }
 
-    pub fn apply_evolution(&self, evolution: Evolution) -> Result<()> {
-        self.view_model.evolute(&evolution);
+    pub fn tick(&self) -> Result<()> {
         Ok(self.draw()?)
+    }
+
+    pub fn handle_message(&self, message: RepositoryMessage) -> Result<()> {
+        Ok(self.tick()?)
     }
 
     fn draw(&self) -> Result<()> {

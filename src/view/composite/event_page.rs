@@ -72,28 +72,28 @@ impl Default for EventPageViewMode {
     }
 }
 
-impl Evolute for EventPageViewMode {
-    fn evolute(&self, evolution: &Evolution) {
-        let data = evolution.new_data;
+// impl Evolute for EventPageViewMode {
+//     fn evolute(&self, evolution: &Evolution) {
+//         let data = evolution.new_data;
 
-        data.events.iter().for_each(|event| {
-            self.event_items.borrow_mut().push(Rc::new(EventItem {
-                subject: RefCell::new(event.subject.clone()),
-                content: RefCell::new(event.content.clone()),
+//         data.events.iter().for_each(|event| {
+//             self.event_items.borrow_mut().push(Rc::new(EventItem {
+//                 subject: RefCell::new(event.subject.clone()),
+//                 content: RefCell::new(event.content.clone()),
 
-                is_selected: RefCell::new(false),
-            }))
-        });
+//                 is_selected: RefCell::new(false),
+//             }))
+//         });
 
-        self.title_list.items.replace(
-            self.event_items
-                .borrow()
-                .iter()
-                .map(|item| item.clone() as Rc<(dyn ListComponentItem)>)
-                .collect::<Vec<Rc<dyn ListComponentItem>>>(),
-        );
-    }
-}
+//         self.title_list.items.replace(
+//             self.event_items
+//                 .borrow()
+//                 .iter()
+//                 .map(|item| item.clone() as Rc<(dyn ListComponentItem)>)
+//                 .collect::<Vec<Rc<dyn ListComponentItem>>>(),
+//         );
+//     }
+// }
 
 impl KeyEventHandler for EventPageViewMode {
     fn handle_key(&self, key: &crossterm::event::KeyEvent) {

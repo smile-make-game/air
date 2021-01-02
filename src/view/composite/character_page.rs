@@ -72,26 +72,26 @@ impl Default for CharacterPageViewMode {
     }
 }
 
-impl Evolute for CharacterPageViewMode {
-    fn evolute(&self, evolution: &Evolution) {
-        let data = evolution.new_data;
-        data.characters.iter().for_each(|character| {
-            self.brief_list.borrow_mut().push(Rc::new(CharacterBrief {
-                name: RefCell::new(character.name.clone()),
+// impl Evolute for CharacterPageViewMode {
+//     fn evolute(&self, evolution: &Evolution) {
+//         let data = evolution.new_data;
+//         data.characters.iter().for_each(|character| {
+//             self.brief_list.borrow_mut().push(Rc::new(CharacterBrief {
+//                 name: RefCell::new(character.name.clone()),
 
-                is_selected: RefCell::new(false),
-            }));
-        });
+//                 is_selected: RefCell::new(false),
+//             }));
+//         });
 
-        self.character_list.items.replace(
-            self.brief_list
-                .borrow()
-                .iter()
-                .map(|item| item.clone() as Rc<(dyn ListComponentItem)>)
-                .collect::<Vec<Rc<dyn ListComponentItem>>>(),
-        );
-    }
-}
+//         self.character_list.items.replace(
+//             self.brief_list
+//                 .borrow()
+//                 .iter()
+//                 .map(|item| item.clone() as Rc<(dyn ListComponentItem)>)
+//                 .collect::<Vec<Rc<dyn ListComponentItem>>>(),
+//         );
+//     }
+// }
 
 impl KeyEventHandler for CharacterPageViewMode {
     fn handle_key(&self, key: &crossterm::event::KeyEvent) {
