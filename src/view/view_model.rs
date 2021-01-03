@@ -1,10 +1,10 @@
-use crate::model::{FromRepositoryMessageItem, RepositoryMessage};
-
 use super::{
     component::view_model::*,
     composite::view_model::*,
     interfaces::{data_processor::DataProcessor, event_handler::KeyEventHandler},
 };
+use crate::model::{FromRepositoryMessageItem, RepositoryMessage};
+use anyhow::Result;
 use crossterm::event::*;
 use std::{cell::RefCell, rc::Rc};
 
@@ -63,12 +63,14 @@ impl ViewModel {
         }
     }
 
-    pub fn process_data(&self, data: RepositoryMessage) {
-        let vms: Vec<Box<dyn DataProcessor>> = vec![];
+    pub fn process_data(&self, data: RepositoryMessage) -> Result<()> {
         if let RepositoryMessage::FromRepository(msg) = data {
-            msg.iter().for_each(|item| {
-                vms.iter().for_each(|p| p.process_data(item));
-            });
+            for item in msg.iter() {
+                self.event_page.process_data(item)?;
+                self.character_page.process_data(item)?;
+                self.system_page.process_data(item)?;
+            }
         }
+        Ok(())
     }
 }

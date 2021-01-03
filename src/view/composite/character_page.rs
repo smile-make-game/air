@@ -72,26 +72,53 @@ impl Default for CharacterPageViewMode {
     }
 }
 
-// impl Evolute for CharacterPageViewMode {
-//     fn evolute(&self, evolution: &Evolution) {
-//         let data = evolution.new_data;
-//         data.characters.iter().for_each(|character| {
-//             self.brief_list.borrow_mut().push(Rc::new(CharacterBrief {
-//                 name: RefCell::new(character.name.clone()),
+impl DataProcessor for CharacterPageViewMode {
+    fn process_data(&self, msg: &FromRepositoryMessageItem) -> Result<()> {
+        match msg {
+            FromRepositoryMessageItem::Insert(payload) => {
+                payload.character_list.iter().for_each(|item| {
+                    self.brief_list.borrow_mut().push(Rc::new(CharacterBrief {
+                        id: item.id.clone(),
 
-//                 is_selected: RefCell::new(false),
-//             }));
-//         });
+                        name: RefCell::new(item.name.clone()),
 
-//         self.character_list.items.replace(
-//             self.brief_list
-//                 .borrow()
-//                 .iter()
-//                 .map(|item| item.clone() as Rc<(dyn ListComponentItem)>)
-//                 .collect::<Vec<Rc<dyn ListComponentItem>>>(),
-//         );
-//     }
-// }
+                        is_selected: RefCell::new(false),
+                    }));
+                });
+            }
+            FromRepositoryMessageItem::Update(payload) => {
+                payload.character_list.iter().for_each(|item| {
+                    if let Some(old_item) =
+                        self.brief_list.borrow().iter().find(|oi| item.id == oi.id)
+                    {
+                        old_item.name.replace(item.name.clone());
+                    }
+                });
+            }
+            FromRepositoryMessageItem::Remove(payload) => {
+                payload.character_list.iter().for_each(|item| {
+                    if let Some(index) = self
+                        .brief_list
+                        .borrow()
+                        .iter()
+                        .position(|oi| item.id == oi.id)
+                    {
+                        self.brief_list.borrow_mut().remove(index);
+                    }
+                });
+            }
+        }
+        self.character_list.items.replace(
+            self.brief_list
+                .borrow()
+                .iter()
+                .map(|item| item.clone() as Rc<(dyn ListComponentItem)>)
+                .collect::<Vec<Rc<dyn ListComponentItem>>>(),
+        );
+
+        Ok(())
+    }
+}
 
 impl KeyEventHandler for CharacterPageViewMode {
     fn handle_key(&self, key: &crossterm::event::KeyEvent) {
@@ -118,6 +145,7 @@ impl Page for CharacterPageViewMode {
 }
 
 pub struct CharacterBrief {
+    id: String,
     name: RefCell<String>,
 
     is_selected: RefCell<bool>,

@@ -1,4 +1,6 @@
 use super::dep::*;
+use crate::view::interfaces::data_processor::*;
+use anyhow::Result;
 
 pub struct EventPage {
     vm: Rc<EventPageViewMode>,
@@ -72,28 +74,54 @@ impl Default for EventPageViewMode {
     }
 }
 
-// impl Evolute for EventPageViewMode {
-//     fn evolute(&self, evolution: &Evolution) {
-//         let data = evolution.new_data;
+impl DataProcessor for EventPageViewMode {
+    fn process_data(&self, msg: &FromRepositoryMessageItem) -> Result<()> {
+        match msg {
+            FromRepositoryMessageItem::Insert(payload) => {
+                payload.quest_list.iter().for_each(|item| {
+                    self.event_items.borrow_mut().push(Rc::new(EventItem {
+                        id: item.id.clone(),
 
-//         data.events.iter().for_each(|event| {
-//             self.event_items.borrow_mut().push(Rc::new(EventItem {
-//                 subject: RefCell::new(event.subject.clone()),
-//                 content: RefCell::new(event.content.clone()),
+                        subject: RefCell::new(item.title.clone()),
+                        content: RefCell::new(format!("content of {}", item.title)),
 
-//                 is_selected: RefCell::new(false),
-//             }))
-//         });
+                        is_selected: RefCell::new(false),
+                    }));
+                });
+            }
+            FromRepositoryMessageItem::Update(payload) => {
+                payload.quest_list.iter().for_each(|item| {
+                    if let Some(old_item) =
+                        self.event_items.borrow().iter().find(|oi| item.id == oi.id)
+                    {
+                        old_item.subject.replace(item.title.clone());
+                    }
+                });
+            }
+            FromRepositoryMessageItem::Remove(payload) => {
+                payload.quest_list.iter().for_each(|item| {
+                    if let Some(index) = self
+                        .event_items
+                        .borrow()
+                        .iter()
+                        .position(|oi| item.id == oi.id)
+                    {
+                        self.event_items.borrow_mut().remove(index);
+                    }
+                });
+            }
+        }
 
-//         self.title_list.items.replace(
-//             self.event_items
-//                 .borrow()
-//                 .iter()
-//                 .map(|item| item.clone() as Rc<(dyn ListComponentItem)>)
-//                 .collect::<Vec<Rc<dyn ListComponentItem>>>(),
-//         );
-//     }
-// }
+        self.title_list.items.replace(
+            self.event_items
+                .borrow()
+                .iter()
+                .map(|item| item.clone() as Rc<(dyn ListComponentItem)>)
+                .collect::<Vec<Rc<dyn ListComponentItem>>>(),
+        );
+        Ok(())
+    }
+}
 
 impl KeyEventHandler for EventPageViewMode {
     fn handle_key(&self, key: &crossterm::event::KeyEvent) {
@@ -134,6 +162,7 @@ impl Page for EventPageViewMode {
 }
 
 pub struct EventItem {
+    id: String,
     subject: RefCell<String>,
     content: RefCell<String>,
 

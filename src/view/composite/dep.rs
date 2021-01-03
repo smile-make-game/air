@@ -3,6 +3,7 @@ pub use super::super::{
     interfaces::{event_handler::KeyEventHandler, page::*},
     styles::*,
     types::*,
+    interfaces::data_processor::*,
 };
 pub use std::cell::RefCell;
 pub use std::rc::Rc;

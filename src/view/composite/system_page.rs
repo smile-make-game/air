@@ -37,6 +37,12 @@ impl Default for SystemPageViewMode {
     }
 }
 
+impl DataProcessor for SystemPageViewMode {
+    fn process_data(&self, msg: &FromRepositoryMessageItem) -> Result<()> {
+        Ok(())
+    }
+}
+
 impl KeyEventHandler for SystemPageViewMode {
     fn handle_key(&self, key: &crossterm::event::KeyEvent) {
         match key.code {

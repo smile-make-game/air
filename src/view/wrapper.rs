@@ -43,7 +43,7 @@ impl ViewWrapper {
     }
 
     pub fn handle_message(&self, message: RepositoryMessage) -> Result<()> {
-        self.view_model.process_data(message);
+        self.view_model.process_data(message)?;
 
         Ok(self.tick()?)
     }
