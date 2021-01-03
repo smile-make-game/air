@@ -1,7 +1,9 @@
 use crate::model::{FromRepositoryMessageItem, RepositoryMessage};
 
 use super::{
-    component::view_model::*, composite::view_model::*, interfaces::event_handler::KeyEventHandler,
+    component::view_model::*,
+    composite::view_model::*,
+    interfaces::{data_processor::DataProcessor, event_handler::KeyEventHandler},
 };
 use crossterm::event::*;
 use std::{cell::RefCell, rc::Rc};
@@ -62,6 +64,11 @@ impl ViewModel {
     }
 
     pub fn process_data(&self, data: RepositoryMessage) {
-        if let RepositoryMessage::FromRepository(msg) = data {}
+        let vms: Vec<Box<dyn DataProcessor>> = vec![];
+        if let RepositoryMessage::FromRepository(msg) = data {
+            msg.iter().for_each(|item| {
+                vms.iter().for_each(|p| p.process_data(item));
+            });
+        }
     }
 }
