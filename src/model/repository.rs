@@ -90,7 +90,9 @@ impl DataRepository {
             quest_list: vec![QuestModel {
                 id: "qid1".to_owned(),
                 title: "quest title".to_owned(),
+                max_characters: 1
             }],
+            ..Default::default()
         };
         Ok(())
     }
