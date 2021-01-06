@@ -13,7 +13,7 @@ pub struct ViewModel {
     pub edge_border: Rc<EdgeComponentViewModel>,
     pub tab: Rc<TabComponentViewModel>,
     // pages
-    pub event_page: Rc<EventPageViewMode>,
+    pub quest_page: Rc<QuestPageViewMode>,
     pub character_page: Rc<CharacterPageViewMode>,
     pub system_page: Rc<SystemPageViewMode>,
 
@@ -25,7 +25,7 @@ impl Default for ViewModel {
     fn default() -> Self {
         let edge_border = Rc::new(EdgeComponentViewModel::default());
 
-        let event_page = Rc::new(EventPageViewMode::default());
+        let event_page = Rc::new(QuestPageViewMode::default());
         let character_page = Rc::new(CharacterPageViewMode::default());
         let system_page = Rc::new(SystemPageViewMode::default());
 
@@ -37,7 +37,7 @@ impl Default for ViewModel {
         Self {
             tab,
             edge_border,
-            event_page,
+            quest_page: event_page,
             character_page,
             system_page,
 
@@ -49,7 +49,7 @@ impl Default for ViewModel {
 impl KeyEventHandler for ViewModel {
     fn handle_key(&self, key: &KeyEvent) {
         self.tab.handle_key(key);
-        self.event_page.handle_key(key);
+        self.quest_page.handle_key(key);
         self.character_page.handle_key(key);
     }
 }
@@ -66,7 +66,7 @@ impl ViewModel {
     pub fn process_data(&self, data: RepositoryMessage) -> Result<()> {
         if let RepositoryMessage::FromRepository(msg) = data {
             for item in msg.iter() {
-                self.event_page.process_data(item)?;
+                self.quest_page.process_data(item)?;
                 self.character_page.process_data(item)?;
                 self.system_page.process_data(item)?;
             }

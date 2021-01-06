@@ -2,15 +2,15 @@ use super::dep::*;
 use crate::view::interfaces::data_processor::*;
 use anyhow::Result;
 
-pub struct EventPage {
-    vm: Rc<EventPageViewMode>,
+pub struct QuestPage {
+    vm: Rc<QuestPageViewMode>,
 
     title_list: ListComponent,
     event_detail: MessageComponent,
 }
 
-impl From<Rc<EventPageViewMode>> for EventPage {
-    fn from(view_model: Rc<EventPageViewMode>) -> Self {
+impl From<Rc<QuestPageViewMode>> for QuestPage {
+    fn from(view_model: Rc<QuestPageViewMode>) -> Self {
         Self {
             vm: view_model.clone(),
 
@@ -20,7 +20,7 @@ impl From<Rc<EventPageViewMode>> for EventPage {
     }
 }
 
-impl Widget for &EventPage {
+impl Widget for &QuestPage {
     fn render(self, area: Rect, buf: &mut Buffer) {
         if !*self.vm.focused.borrow() {
             return;
@@ -39,17 +39,17 @@ impl Widget for &EventPage {
     }
 }
 
-pub struct EventPageViewMode {
+pub struct QuestPageViewMode {
     pub title_list: Rc<ListComponentViewModel>,
     pub event_detail: Rc<MessageComponentViewModel>,
 
     focused: RefCell<bool>,
 
     pub page_title: Rc<RefCell<String>>,
-    pub event_items: RefCell<Vec<Rc<EventItem>>>,
+    pub event_items: RefCell<Vec<Rc<QuestItem>>>,
 }
 
-impl Default for EventPageViewMode {
+impl Default for QuestPageViewMode {
     fn default() -> Self {
         let page_title = Rc::new(RefCell::new("Quests".to_owned()));
 
@@ -74,12 +74,12 @@ impl Default for EventPageViewMode {
     }
 }
 
-impl DataProcessor for EventPageViewMode {
+impl DataProcessor for QuestPageViewMode {
     fn process_data(&self, msg: &FromRepositoryMessageItem) -> Result<()> {
         match msg {
             FromRepositoryMessageItem::Insert(payload) => {
                 payload.quest_list.iter().for_each(|item| {
-                    self.event_items.borrow_mut().push(Rc::new(EventItem {
+                    self.event_items.borrow_mut().push(Rc::new(QuestItem {
                         id: item.id.clone(),
 
                         subject: RefCell::new(item.title.clone()),
@@ -123,7 +123,7 @@ impl DataProcessor for EventPageViewMode {
     }
 }
 
-impl KeyEventHandler for EventPageViewMode {
+impl KeyEventHandler for QuestPageViewMode {
     fn handle_key(&self, key: &crossterm::event::KeyEvent) {
         if !*self.focused.borrow() {
             return;
@@ -151,7 +151,7 @@ impl KeyEventHandler for EventPageViewMode {
     }
 }
 
-impl Page for EventPageViewMode {
+impl Page for QuestPageViewMode {
     fn get_title(&self) -> String {
         self.page_title.borrow().clone()
     }
@@ -161,7 +161,7 @@ impl Page for EventPageViewMode {
     }
 }
 
-pub struct EventItem {
+pub struct QuestItem {
     id: String,
     subject: RefCell<String>,
     content: RefCell<String>,
@@ -169,7 +169,7 @@ pub struct EventItem {
     is_selected: RefCell<bool>,
 }
 
-impl ListComponentItem for EventItem {
+impl ListComponentItem for QuestItem {
     fn get_name(&self) -> String {
         self.subject.borrow().clone()
     }

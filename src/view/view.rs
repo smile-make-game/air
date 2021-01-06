@@ -9,7 +9,7 @@ pub struct View {
 
     tab: TabComponent,
 
-    event_page: EventPage,
+    quest_page: QuestPage,
     character_page: CharacterPage,
     system_page: SystemPage,
 }
@@ -21,7 +21,7 @@ impl From<Rc<ViewModel>> for View {
             edge_border: EdgeComponent::from(view_model.edge_border.clone()),
             tab: TabComponent::from(view_model.tab.clone()),
 
-            event_page: EventPage::from(view_model.event_page.clone()),
+            quest_page: QuestPage::from(view_model.quest_page.clone()),
             character_page: CharacterPage::from(view_model.character_page.clone()),
             system_page: SystemPage::from(view_model.system_page.clone()),
         }
@@ -46,7 +46,7 @@ impl Widget for &View {
         self.tab.render(chunks[0], buf);
 
         // render pages
-        self.event_page.render(chunks[1], buf);
+        self.quest_page.render(chunks[1], buf);
         self.character_page.render(chunks[1], buf);
         self.system_page.render(chunks[1], buf);
     }
