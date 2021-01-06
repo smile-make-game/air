@@ -1,5 +1,4 @@
 use super::dep::*;
-use crate::view::interfaces::data_processor::*;
 use anyhow::Result;
 
 pub struct QuestPage {

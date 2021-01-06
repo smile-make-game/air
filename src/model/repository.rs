@@ -58,7 +58,7 @@ impl Repository for DataRepository {
                 change_set.clear();
             }
             let message = self.select().await;
-            if let Some(msg) = message {
+            if let Some(_msg) = message {
                 // TODO: collect change set
             }
         }

@@ -3,7 +3,7 @@ use super::{
     composite::view_model::*,
     interfaces::{data_processor::DataProcessor, event_handler::KeyEventHandler},
 };
-use crate::model::{FromRepositoryMessageItem, RepositoryMessage};
+use crate::model::RepositoryMessage;
 use anyhow::Result;
 use crossterm::event::*;
 use std::{cell::RefCell, rc::Rc};

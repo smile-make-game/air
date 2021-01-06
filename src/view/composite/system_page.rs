@@ -15,7 +15,6 @@ impl Widget for &SystemPage {
         if !*self.vm.focused.borrow() {
             return;
         }
-
     }
 }
 
@@ -38,7 +37,7 @@ impl Default for SystemPageViewMode {
 }
 
 impl DataProcessor for SystemPageViewMode {
-    fn process_data(&self, msg: &FromRepositoryMessageItem) -> Result<()> {
+    fn process_data(&self, _msg: &FromRepositoryMessageItem) -> Result<()> {
         Ok(())
     }
 }

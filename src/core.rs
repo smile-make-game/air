@@ -1,4 +1,4 @@
-use std::{cell::RefCell, time::Duration};
+use std::cell::RefCell;
 
 use crate::{model::*, view::*};
 use anyhow::Result;
@@ -7,7 +7,6 @@ use tokio::{
     select, spawn,
     sync::mpsc::{channel, Receiver, Sender},
     task::JoinHandle,
-    time::sleep,
 };
 
 pub struct Core {
@@ -82,9 +81,9 @@ impl Core {
                     }
                     self.view.handle_input(&event)?;
                 }
-                Input::Tick => {
-                    self.view.tick()?;
-                }
+                // Input::Tick => {
+                //     self.view.tick()?;
+                // }
                 Input::Message(message) => {
                     if let Some(msg) = message {
                         self.view.handle_message(msg)?;
@@ -108,7 +107,7 @@ impl Core {
 #[derive(Debug)]
 pub enum Input {
     Idle,
-    Tick,
+    // Tick,
     Event(event::Event),
     Message(Option<RepositoryMessage>),
 }

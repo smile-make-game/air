@@ -19,11 +19,11 @@ impl Widget for &CharacterDetailComponent {
         border = border.title(format!(" {} ", title));
         border.render(area, buf);
 
-        let chunks = Layout::default()
-            .direction(Direction::Vertical)
-            .margin(1)
-            .constraints(vec![Constraint::Length(1), Constraint::Min(1)])
-            .split(area);
+        // let chunks = Layout::default()
+        //     .direction(Direction::Vertical)
+        //     .margin(1)
+        //     .constraints(vec![Constraint::Length(1), Constraint::Min(1)])
+        //     .split(area);
     }
 }
 
