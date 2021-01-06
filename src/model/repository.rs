@@ -1,11 +1,9 @@
-use std::time::Duration;
-
 use super::{models::*, repository_message::*};
 use anyhow::Result;
+use std::time::Duration;
 use tokio::{
     select,
     sync::mpsc::{channel, Receiver, Sender},
-    time::sleep,
 };
 
 #[async_trait::async_trait]
@@ -38,7 +36,9 @@ struct DataRepository {
 }
 
 impl Drop for DataRepository {
-    fn drop(&mut self) {}
+    fn drop(&mut self) {
+        log::debug!("DataRepository is dropped");
+    }
 }
 
 #[async_trait::async_trait]
