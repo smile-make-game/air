@@ -53,13 +53,13 @@ impl Default for QuestPageViewMode {
         let page_title = Rc::new(RefCell::new("Quests".to_owned()));
 
         let title_list = ListComponentViewModel::default();
-        title_list.title.replace("activated events".to_owned());
+        title_list.title.replace("activated quests".to_owned());
         title_list.focused.replace(true);
 
         let event_content = MessageComponentViewModel::default();
         event_content
             .title
-            .replace(Some("event content".to_owned()));
+            .replace(Some("quest content".to_owned()));
 
         Self {
             title_list: Rc::new(title_list),
